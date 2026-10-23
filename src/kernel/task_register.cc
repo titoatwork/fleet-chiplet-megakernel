@@ -3645,8 +3645,8 @@ int TaskRegister::register_moe_linear_sm90_task(
 
 int TaskRegister::register_moe_topk_softmax_mi300_task(
     threadblock::Graph const &bgraph, std::vector<int> const &params) {
-  // params[0]: renormalize, from the model's norm_topk_prob. Absent means
-  // true, which is what this task did unconditionally before.
+  // params[0]: caller-supplied renormalize flag. Absent means true, which is
+  // what this task did unconditionally before.
   assert(params.size() <= 1);
   bool renormalize = params.empty() ? true : (params[0] != 0);
   int batch_size = 0, num_experts = 0, num_experts_per_tok = 0;
@@ -3690,8 +3690,8 @@ int TaskRegister::register_moe_topk_softmax_mi300_task(
   code.e("    0,");
   code.e("    $,", num_experts);
   // renormalize was hardcoded true. Models with norm_topk_prob=false (e.g.
-  // DeepSeek-V2-Lite, whose six gate weights sum to 0.2079) must not rescale:
-  // renormalising scales the routed-expert contribution by ~4.81x.
+  // DeepSeek-Coder-V2-Lite, whose six gate weights sum to 0.2079) must not
+  // rescale: renormalizing scales the routed-expert contribution by ~4.81x.
   code.e("    $);", renormalize);
   return register_task_variant(TASK_MOE_TOPK_SOFTMAX_MI300, code.to_string());
 }
